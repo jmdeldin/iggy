@@ -1,0 +1,82 @@
+#! /usr/bin/env perl
+#
+# When xbacklight won't work on Intel Graphics, you can read/write from
+# /sys/class/backlight/intel_backlight instead.
+#
+# Author: Jon-Michael Deldin <dev@jmdeldin.com>
+# Date: 2017-11-22
+#
+
+use strict;
+use warnings;
+use diagnostics;
+use Scalar::Util qw(looks_like_number);
+
+sub readFile {
+    my $fn = shift;
+    open my $fh, '<', $fn;
+    my $val = <$fh>;
+    defined($val) or die("Could not open $fn");
+    close $fh;
+    chomp $val;
+
+    return $val;
+}
+
+sub writeFile {
+    my ($fn, $value) = @_;
+    open my $fh, '>', $fn or die("Could not open $fn"); print $fh "$value\n";
+    close $fh;
+}
+
+sub cap {
+    my ($cur, $min, $max) = @_;
+    if ($cur > $max) {
+        return $max;
+    } elsif ($cur < $min) {
+        return $min;
+    }
+    return $cur;
+}
+
+sub usage {
+    printf STDERR "Usage: $0 [keyboard|display] [[+-]VALUE]\n";
+    exit 1;
+}
+
+my %config = (
+    "keyboard" => {
+        "maxFile" => "/sys/class/leds/tpacpi::kbd_backlight/max_brightness",
+        "currentFile" => "/sys/class/leds/tpacpi::kbd_backlight/brightness",
+    },
+    "display" => {
+        "maxFile" => "/sys/class/backlight/intel_backlight/max_brightness",
+        "currentFile" => "/sys/class/backlight/intel_backlight/brightness",
+    },
+);
+
+__PACKAGE__->main(@ARGV) unless caller;
+sub main {
+    if (scalar(@ARGV) != 2) {
+        usage();
+    }
+
+    my $target = $ARGV[0];
+    my $val = $ARGV[1];
+
+    if (!($target eq "keyboard") && !($target eq "display")) {
+        usage();
+    }
+
+    my $maxFile = $config{$target}{"maxFile"};
+    my $currentFile = $config{$target}{"currentFile"};
+    my $maxValue = readFile($maxFile);
+    my $currentValue = readFile($currentFile);
+
+    if (looks_like_number($val)) {
+        $currentValue = cap($currentValue + $val, 0, $maxValue);
+        writeFile($currentFile, $currentValue);
+    }
+
+    printf("$target brightness: $currentValue/$maxValue\n");
+}

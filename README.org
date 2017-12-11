@@ -1,0 +1,26 @@
+* =iggy=: Adjust Display Brightness for Intel Graphics Cards
+
+This is a wrapper script for editing my Thinkpad T460p's
+/sys/class/backlight/intel_backlight/brightness file.
+
+** Usage
+
+Run the following as root:
+
+#+BEGIN_SRC sh
+  # increase display brightness
+  iggy display +10
+
+  # decrease display brightness
+  iggy display -10
+
+  # increase keyboard brightness
+  iggy keyboard +1
+
+  # decrease keyboard brightness
+  iggy keyboard -1
+#+END_SRC
+
+** License
+
+WTFPL
