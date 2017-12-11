@@ -5,7 +5,7 @@ This is a wrapper script for editing my Thinkpad T460p's
 
 ** Usage
 
-Run the following as root:
+Run the following as root or prefix with =sudo=:
 
 #+BEGIN_SRC sh
   # increase display brightness
@@ -19,6 +19,15 @@ Run the following as root:
 
   # decrease keyboard brightness
   iggy keyboard -1
+#+END_SRC
+
+*** Tired of using =sudo=? Want to use your media keys?
+
+Add a line to =/etc/sudoers= or create a new file, =/etc/sudoers.d/iggy=
+with the following:
+
+#+BEGIN_SRC sh
+  myuser ALL=(root) NOPASSWD: /path/to/iggy
 #+END_SRC
 
 ** License
